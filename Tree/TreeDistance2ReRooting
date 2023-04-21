@@ -1,0 +1,57 @@
+#include <iostream>
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+ 
+void dfs1(int node,int par,vector<int>adj[],vector<ll>& subres,vector<ll>& size){
+    size[node]=1;
+    subres[node]=0;
+    for(auto nnode:adj[node]){
+        if(par!=nnode){
+            dfs1(nnode,node,adj,subres,size);
+            size[node]+=size[nnode]*1ll;
+            subres[node]+=subres[nnode]+size[nnode]*1ll;
+        }
+    }
+}
+ 
+void reroot(int from,int to,vector<ll>& subres,vector<ll>& size){
+    size[from]-=size[to]*1ll;
+    subres[from]-=subres[to]+size[to]*1ll;
+    size[to]+=size[from]*1ll;
+    subres[to]+=subres[from]+size[from]*1ll;
+}
+ 
+void dfs2(int node,int par,vector<int>adj[],vector<ll>& subres,vector<ll>& size,vector<ll>& ans){
+    ans[node]=subres[node];
+    for(auto nnode:adj[node]){
+        if(nnode!=par){
+            reroot(node,nnode,subres,size);
+            dfs2(nnode,node,adj,subres,size,ans);
+            reroot(nnode,node,subres,size);
+        }
+    }
+}
+ 
+int main() {
+    // Write C++ code here
+    int x,y,n;
+    cin>>n;
+    vector<int>adj[n+1];
+    for(int i=2;i<=n;i++){
+        cin>>x>>y;
+        adj[x].push_back(y);
+        adj[y].push_back(x);
+    }
+    
+    vector<ll>subres(n+1,0);
+    vector<ll>size(n+1,0);
+    vector<ll>ans(n+1,0);
+    
+    dfs1(1,0,adj,subres,size);
+    dfs2(1,0,adj,subres,size,ans);
+    for(int i=1;i<=n;i++){
+        cout<<ans[i]<<" ";
+    }
+    return 0;
+}
